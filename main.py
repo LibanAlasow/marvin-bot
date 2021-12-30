@@ -2,6 +2,7 @@ import discord
 import os
 import json
 from discord.ext import commands
+from discord.ext.commands import *
 
 client = discord.Client()
 client = commands.Bot(command_prefix="-", help_command=None)
@@ -9,8 +10,27 @@ commands = []
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
+    activity = discord.Game(name="Just Fun")
+    await client.change_presence(status=discord.Status.idle, activity=activity)
+
 
 prefix = "-"
+
+
+import requests
+import datetime
+
+
+
+
+
+
+
+
+
+
+
+
 
 @client.event
 async def on_message(message):
@@ -44,9 +64,11 @@ commands.append({"name": "help", "description": "This command will help you use 
 async def help(ctx, cat=None):
   if cat == None:
     embed = discord.Embed(title="Help", description="Welcome, please select a category", inline=True)
-    embed.add_field(name="help begin", value="These commands will help you understand how the bot works")
-    embed.add_field(name="help mod", value="These commands will help you moderate your server")
+    embed.add_field(name=prefix+"help begin", value="These commands will help you understand how the bot works")
+    embed.add_field(name=prefix+"help mod", value="These commands will help you moderate your server")
+    embed.add_field(name=prefix+"help fun", value="These commands will entertain you!")
     embed.set_author(name="Marvin", icon_url="https://media.discordapp.net/attachments/926020950351302666/926021015849562152/defaultnobackgroundicon.png?width=481&height=481")
+    embed.set_footer(text="(dashboard)[https://bot-dashboard.libanalasow.repl.co/]")
     await ctx.send(embed=embed)
   elif cat == "mod":
     string = ""
@@ -65,6 +87,15 @@ async def help(ctx, cat=None):
 
     embed = discord.Embed(description=string)
     embed.set_footer(text="commands in the category begin")
+    await ctx.send(embed=embed)
+  elif cat == "fun":
+    string = ""
+    for i in commands:
+      if i["category"] == "fun":
+        string += f'{i["usuage"]}  *{i["description"]}*\n'
+
+    embed = discord.Embed(description=string)
+    embed.set_footer(text="commands in the category fun")
     await ctx.send(embed=embed)
       
 
@@ -185,6 +216,50 @@ async def remove_bad_word(ctx, word):
   else:
     await ctx.send(embed=discord.Embed(description=f'{ctx.author.mention} removed a bad word'))
   save_bad_words(bad_words)
+
+commands.append({"name" : "kick", "description" : "This command will kick a member", "usuage":"kick <member> <reason>", "category": "mod"})
+@client.command()
+@discord.ext.commands.has_permissions(kick_members=True)
+async def kick(ctx, member : discord.Member=None,*, reason=None):
+  await ctx.message.delete()
+  if reason == None:
+    reason = "No provided reason for kick"
+  if member == None:
+    await ctx.send("sorry, you have to mention the member you'd like to kick")
+  else:
+    embed = discord.Embed(description=f"{member.mention} was kicked (`{reason}`)")
+    await member.kick(reason=reason)
+    await ctx.send(embed=embed)
+
+commands.append({"name" : "ban", "description" : "This command will ban a member", "usuage":"ban <member> <reason>", "category": "mod"})
+@client.command()
+@discord.ext.commands.has_permissions(ban_members=True)
+async def ban(ctx, member : discord.Member=None,*, reason=None):
+  await ctx.message.delete()
+  if reason == None:
+    reason = "No provided reason for ban"
+  if member == None:
+    await ctx.send("sorry, you have to mention the member you'd like to ban")
+  else:
+    embed = discord.Embed(description=f"{member.mention} was banned (`{reason}`)")
+    await member.ban(reason=reason)
+    await ctx.send(embed=embed)
+  
+
+
+commands.append({"name" : "say", "description" : "Make the bot say something!", "usuage":"say <something>", "category": "fun"})
+@client.command("say")
+async def say(ctx,*, wut):
+  await ctx.message.delete()
+  await ctx.send(wut)
+
+
+commands.append({"name" : "embed", "description" : "Turn a regular message into an embed", "usuage":"embed <text>", "category": "fun"})
+@client.command("embed")
+async def embed(ctx,*, wut):
+  await ctx.message.delete()
+  await ctx.send(embed=discord.Embed(description=wut))
+
 
 
 
