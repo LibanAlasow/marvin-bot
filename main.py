@@ -12,6 +12,33 @@ async def on_ready():
 
 prefix = "-"
 
+@client.event
+async def on_message(message):
+  if message.author == client: return
+  if message.channel.type is discord.ChannelType.private: return
+  if str(message.guild.id) in get_bad_words():
+    dat = get_bad_words()
+    for i in dat[str(message.guild.id)]:
+      if i in message.content.upper():
+        await message.delete()
+        await message.channel.send(embed=discord.Embed(description=f'{message.author.mention} your message contained a prohibited word!'))
+        warnData = get_warnings()
+        user = message.author
+        if str(message.guild.id) in warnData.keys():
+          if str(user.id) in warnData[str(message.guild.id)].keys():
+            warnData[str(message.guild.id)][str(user.id)] += 1
+          else:
+            warnData[str(message.guild.id)][str(user.id)] = 1
+        else:
+          warnData[str(message.guild.id)] = {}
+          warnData[str(message.guild.id)][str(user.id)] = 1
+        save_warnings(warnData)
+        break
+  await client.process_commands(message)
+
+
+
+
 commands.append({"name": "help", "description": "This command will help you use the bot", "usuage": f"{prefix}help <category>", "category": "begin"})
 @client.command("help")
 async def help(ctx, cat=None):
@@ -64,6 +91,7 @@ def save_bad_words(warningsdata):
 
 
 commands.append({"name": "warn", "description": "This command will warn a user", "usuage": f"{prefix}warn <user> <reason>", "category": "mod"})
+@discord.ext.commands.has_permissions(kick_members=True)
 @client.command("warn")
 async def warn(ctx, user:discord.Member,*, reason="No reason provided"):
   warnData = get_warnings()
@@ -82,6 +110,7 @@ async def warn(ctx, user:discord.Member,*, reason="No reason provided"):
   save_warnings(warnData)
 
 commands.append({"name": "remove warn", "description": "This command will warn a user", "usuage": f"{prefix}remove_warn <user>", "category": "mod"})
+@discord.ext.commands.has_permissions(kick_members=True)
 @client.command("remove_warn")
 async def remove_warn(ctx, user:discord.Member):
   warnData = get_warnings()
@@ -102,6 +131,7 @@ async def remove_warn(ctx, user:discord.Member):
 
 
 commands.append({"name": "add_bad_word", "description": "This command will add a prohibited word to the server (one word per command!)", "usuage": f"{prefix}add_bad_word <word>", "category": "mod"})
+@discord.ext.commands.has_permissions(kick_members=True)
 @client.command("add_bad_word")
 async def add_bad_word(ctx, word):
   bad_words = get_bad_words()
@@ -128,6 +158,7 @@ async def add_bad_word(ctx, word):
 
 commands.append({"name": "bad_words", "description": "This command will send you a list of all the prohibited words)", "usuage": f"{prefix}bad_words", "category": "mod"})
 @client.command("bad_words")
+@discord.ext.commands.has_permissions(kick_members=True)
 async def bad_words(ctx):
   string = ""
   words = get_bad_words()[str(ctx.guild.id)]
@@ -138,6 +169,7 @@ async def bad_words(ctx):
   await ctx.reply(embed=discord.Embed(description="sent in your DM"))
 
 commands.append({"name": "remove_bad_word", "description": "This command will a remove specific prohibited word", "usuage": f"{prefix}remove_bad_word <word>", "category": "mod"})
+@discord.ext.commands.has_permissions(kick_members=True)
 @client.command("remove_bad_word")
 async def remove_bad_word(ctx, word):
   await ctx.message.delete()
@@ -153,13 +185,6 @@ async def remove_bad_word(ctx, word):
   else:
     await ctx.send(embed=discord.Embed(description=f'{ctx.author.mention} removed a bad word'))
   save_bad_words(bad_words)
-
-
-#      embed = discord.Embed(description=f'Usuage `{i["usuage"]}`', inline=True)
-#      embed.set_footer(text=i["description"])
-#      embed.set_author(name=f'command *{i["name"]}* ')
-#      await ctx.send(embed=embed)
-
 
 
 
