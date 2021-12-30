@@ -17,10 +17,6 @@ async def on_ready():
 prefix = "-"
 
 
-import requests
-import datetime
-
-
 
 
 
