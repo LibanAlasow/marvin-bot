@@ -59,12 +59,13 @@ commands.append({"name": "help", "description": "This command will help you use 
 @client.command("help")
 async def help(ctx, cat=None):
   if cat == None:
-    embed = discord.Embed(title="Help", description="Welcome, please select a category", inline=True)
+    embed = discord.Embed(title="Help", description="Welcome, please select a category\n[Bot website](https://bot-dashboard.libanalasow.repl.co/)", inline=True)
     embed.add_field(name=prefix+"help begin", value="These commands will help you understand how the bot works")
     embed.add_field(name=prefix+"help mod", value="These commands will help you moderate your server")
     embed.add_field(name=prefix+"help fun", value="These commands will entertain you!")
+    embed.add_field(name=prefix+"help tools", value="These commands will help you do things easier and quicker!")
     embed.set_author(name="Marvin", icon_url="https://media.discordapp.net/attachments/926020950351302666/926021015849562152/defaultnobackgroundicon.png?width=481&height=481")
-    embed.set_footer(text="(dashboard)[https://bot-dashboard.libanalasow.repl.co/]")
+    embed.set_footer(text="Creator Liban Alasow")
     await ctx.send(embed=embed)
   elif cat == "mod":
     string = ""
@@ -213,7 +214,7 @@ async def remove_bad_word(ctx, word):
     await ctx.send(embed=discord.Embed(description=f'{ctx.author.mention} removed a bad word'))
   save_bad_words(bad_words)
 
-commands.append({"name" : "kick", "description" : "This command will kick a member", "usuage":"kick <member> <reason>", "category": "mod"})
+commands.append({"name" : "kick", "description" : "This command will kick a member", "usuage":f"{prefix}kick <member> <reason>", "category": "mod"})
 @client.command()
 @discord.ext.commands.has_permissions(kick_members=True)
 async def kick(ctx, member : discord.Member=None,*, reason=None):
@@ -227,7 +228,7 @@ async def kick(ctx, member : discord.Member=None,*, reason=None):
     await member.kick(reason=reason)
     await ctx.send(embed=embed)
 
-commands.append({"name" : "ban", "description" : "This command will ban a member", "usuage":"ban <member> <reason>", "category": "mod"})
+commands.append({"name" : "ban", "description" : f"{prefix}This command will ban a member", "usuage":"ban <member> <reason>", "category": "mod"})
 @client.command()
 @discord.ext.commands.has_permissions(ban_members=True)
 async def ban(ctx, member : discord.Member=None,*, reason=None):
@@ -243,21 +244,42 @@ async def ban(ctx, member : discord.Member=None,*, reason=None):
   
 
 
-commands.append({"name" : "say", "description" : "Make the bot say something!", "usuage":"say <something>", "category": "fun"})
+commands.append({"name" : "say", "description" : "Make the bot say something!", "usuage":f"{prefix}say <something>", "category": "fun"})
 @client.command("say")
 async def say(ctx,*, wut):
   await ctx.message.delete()
   await ctx.send(wut)
 
 
-commands.append({"name" : "embed", "description" : "Turn a regular message into an embed", "usuage":"embed <text>", "category": "fun"})
+commands.append({"name" : "embed", "description" : f"Turn a regular message into an embed", "usuage":f"{prefix}embed <text>", "category": "fun"})
 @client.command("embed")
 async def embed(ctx,*, wut):
   await ctx.message.delete()
   await ctx.send(embed=discord.Embed(description=wut))
 
 
+commands.append({"name" : "poll", f"description" : "Create a poll and let people vote", "usuage":"poll <text>", "category": "fun"})
+@has_permissions(manage_messages = True)
+@client.command("poll")
+async def poll(ctx,*,text):
+  await ctx.message.delete()
+  e = await ctx.send(embed=discord.Embed(description=text).set_author(name=ctx.author.name+" created a poll" ,icon_url=ctx.author.avatar_url))
+  await e.add_reaction("☑")
+  await e.add_reaction("❎")
+
+
+commands.append({"name" : "clear", "description" : "Clear messages", "usuage":f"{prefix}clear <amount>", "category": "tools"})
+@client.command()
+@has_permissions(manage_messages = True)
+async def clear(ctx , amount=5):
+  await ctx.channel.purge(limit=amount + 1)
 
 
 
+
+
+
+
+
+print(commands)
 client.run(os.getenv("DISCORD_TOKEN"))
