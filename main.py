@@ -28,6 +28,127 @@ prefix = "-"
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from ro_py import Client
+
+
+
+
+
+roblox = Client("C9446B052EFC196292BEE5100DC939D125DF7187C0E444919F2A86B3E91D14ABFF0C6008E332C11AB05B1AA690A5EC9AE8B2DBA3F8DF709481584BE91F65FE68920B3C14CD8220E8E758D19CEEC3B5B896505AFA407A50DC2D1B1C6EBF31381F1D523EF5C454393417425777FD27D4A519BB3DB6533B24613E86D3A542BD9F27EA6CF3065D9843E92BC448BD29E652B31CC68245AF25C59E6B81B1A3CE6F548D9675D6E5DA25BB34082105FA2740ED93025971D5899CF987C898BA6DEE52CF450C06E8D2CD5C4EBA855EE23214F8A3BF6B0F5324553B8D7CD4CCE45677A705D894A4B2B3BFC05207904DD890019371156FAB04AA34384EA1FA73E33891208909EE4E37EACB035EC780A758DE81D75EF6ACDB017CE8364418457007CE15ED883C27E19FD234ABC3BEA5BF851783B316C8B963C3A2C9139CC35B15681E6568F5471028280E57EE91633868E6DDAF01EBDEC20CFE54")
+
+
+
+
+
+
+commands.append({"name": "whois", "description": "This command will get information about a roblox player", "usuage": f"{prefix}whois <username>", "category": "roblox"})
+from ro_py.thumbnails import ThumbnailSize, ThumbnailType
+@client.command("whois")
+async def whois(ctx, username):
+    user = await roblox.get_user_by_username(username)
+    embed = discord.Embed(title=f"Info for {user.name}")
+    embed.add_field(
+        name="Username",
+        value="`" + user.name + "`"
+    )
+    embed.add_field(
+        name="Display Name",
+        value="`" + user.display_name + "`"
+    )
+    embed.add_field(
+        name="User ID",
+        value="`" + str(user.id) + "`"
+    )
+    embed.add_field(
+        name="Description",
+        value="```" + (user.description or "No description") + "```"
+    )
+
+    avatar_image = await user.thumbnails.get_avatar_image(
+        shot_type=ThumbnailType.avatar_headshot,
+        size=ThumbnailSize.size_420x420, 
+        is_circular=False 
+    )
+    embed.set_thumbnail(
+        url=avatar_image
+    )
+    await ctx.send(embed=embed)
+
+
+
+
+
+
+
+commands.append({"name": "get_group", "description": "This command will get information about a roblox group", "usuage": f"{prefix}get_group <id>", "category": "roblox"})
+@client.command("get_group")
+async def get_group(ctx, id):
+  group = await roblox.get_group(id)
+  icon_url = await group.owner.thumbnails.get_avatar_image(
+        shot_type=ThumbnailType.avatar_headshot,
+        size=ThumbnailSize.size_420x420, 
+        is_circular=False 
+    )
+  await ctx.send(
+    embed = discord.Embed(description=group.description)
+      .set_author(name=group.name + f' by {group.owner.name}', icon_url=icon_url)
+      .add_field(name="```group members```", value=group.member_count, inline=True)
+      .add_field(name="```group id```", value=group.id, inline=True)
+      .add_field(name="Last shout", value=f'``` {group.shout} ```', inline=False)
+      
+  )
+
+
+commands.append({"name": "get_avatar", "description": "This command will get get the avatar of a user", "usuage": f"{prefix}get_avatar <username>", "category": "roblox"})
+@client.command("get_avatar")
+async def get_avatar(ctx, username):
+  user = await roblox.get_user_by_username(username)
+  try:
+    icon_url = await user.thumbnails.get_avatar_image(
+        size=ThumbnailSize.size_420x420, 
+        is_circular=False 
+    )
+    await ctx.send(embed=discord.Embed(description=f'{user.name}\'s Avatar').set_image(url=icon_url))
+  except:
+    await ctx.send(embed=discord.Embed(description=f'Cannot find the username {username}'))
+    
+
+
+
+
+
+
+
+
+
+
 @client.event
 async def on_message(message):
   if message.author == client: return
@@ -60,6 +181,7 @@ commands.append({"name": "help", "description": "This command will help you use 
 async def help(ctx, cat=None):
   if cat == None:
     embed = discord.Embed(title="Help", description="Welcome, please select a category\n[Bot website](https://bot-dashboard.libanalasow.repl.co/)", inline=True)
+    embed.add_field(name=prefix+"help roblox", value="These commands will interact with roblox")
     embed.add_field(name=prefix+"help begin", value="These commands will help you understand how the bot works")
     embed.add_field(name=prefix+"help mod", value="These commands will help you moderate your server")
     embed.add_field(name=prefix+"help fun", value="These commands will entertain you!")
@@ -93,6 +215,15 @@ async def help(ctx, cat=None):
 
     embed = discord.Embed(description=string)
     embed.set_footer(text="commands in the category fun")
+    await ctx.send(embed=embed)
+  elif cat == "roblox":
+    string = ""
+    for i in commands:
+      if i["category"] == "roblox":
+        string += f'{i["usuage"]}  *{i["description"]}*\n'
+
+    embed = discord.Embed(description=string)
+    embed.set_footer(text="commands in the category roblox")
     await ctx.send(embed=embed)
       
 
@@ -277,9 +408,4 @@ async def clear(ctx , amount=5):
 
 
 
-
-
-
-
-print(commands)
 client.run(os.getenv("DISCORD_TOKEN"))
