@@ -262,6 +262,15 @@ async def help(ctx, cat=None):
     embed = discord.Embed(description=string)
     embed.set_footer(text="commands in the category roblox")
     await ctx.send(embed=embed)
+  elif cat == "tools":
+    string = ""
+    for i in commands:
+      if i["category"] == "tools":
+        string += f'{i["usuage"]}  *{i["description"]}*\n'
+
+    embed = discord.Embed(description=string)
+    embed.set_footer(text="commands in the category tools")
+    await ctx.send(embed=embed)
       
 
 
