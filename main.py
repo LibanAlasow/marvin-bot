@@ -8,7 +8,7 @@ intents = discord.Intents.default()
 intents.members = True
 
 client = discord.Client()
-client = commands.Bot(command_prefix="b-", help_command=None, intents=intents)
+client = commands.Bot(command_prefix="-", help_command=None, intents=intents)
 commands = []
 @client.event
 async def on_ready():
