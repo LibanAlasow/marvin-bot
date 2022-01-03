@@ -4,8 +4,11 @@ import json
 from discord.ext import commands
 from discord.ext.commands import *
 
+intents = discord.Intents.default()
+intents.members = True
+
 client = discord.Client()
-client = commands.Bot(command_prefix="-", help_command=None)
+client = commands.Bot(command_prefix="b-", help_command=None, intents=intents)
 commands = []
 @client.event
 async def on_ready():
@@ -20,7 +23,15 @@ prefix = "-"
 
 
 
+@client.event
+async def on_member_join(member):
+   if member.guild.id == 927307720451833896:
+     await client.get_channel(927603402333098075).send(embed=discord.Embed(description=f"Welcome {member.mention} to our community, we're glad you joined!").set_author(name=f"{member.name} is now an official member", icon_url=member.avatar_url))
 
+@client.event
+async def on_member_remove(member):
+   if member.guild.id == 927307720451833896:
+     await client.get_channel(927603402333098075).send(embed=discord.Embed(description=f"{member.mention} Left the server!").set_author(name=f"{member.name} left", icon_url=member.avatar_url))
 
 
 
