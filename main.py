@@ -468,7 +468,7 @@ async def rank(ctx , member: discord.Member = None):
   if member == None:
     await ctx.send(embed=discord.Embed(description=f"You are in level {levels[str(ctx.guild.id)][str(ctx.author.id)]['level']}").set_author(name=f"{ctx.author.name}'s Rank in {ctx.guild.name}", icon_url=ctx.author.avatar_url))
   else:
-    await ctx.send(embed=discord.Embed(description=f"{member.mention} is in level {levels[str(ctx.guild.id)][str(member.id)]['level']}").set_author(name=member.name+f"'s Rank in {ctx.guild.name}", icon_url=member.avatar_url))
+    await ctx.send(embed=discord.Embed(description=f"{member.mention} is in level {levels[str(ctx.guild.id)][str(member.id)]['level']}").set_author(name=member.name+f"'s Rank in {ctx.guild.name}", icon_url=member.avatar_url).set_footer(text=f"{levels[str(ctx.guild.id)][str(member.id)]['xp']}/500"))
 
 
 client.run(os.getenv("DISCORD_TOKEN"))
