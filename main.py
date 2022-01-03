@@ -160,6 +160,7 @@ async def get_avatar(ctx, username):
 
 
 
+import random
 
 
 @client.event
@@ -184,6 +185,29 @@ async def on_message(message):
           warnData[str(message.guild.id)][str(user.id)] = 1
         save_warnings(warnData)
         break
+    
+  levels = get_levels()
+  print("get levels")
+  if str(message.guild.id) in levels:
+    print("guild in data")
+    if str(message.author.id) in levels[str(message.guild.id)]:
+      print("user in data")
+      levels[str(message.guild.id)][str(message.author.id)]["xp"] += random.randint(15, 30)
+    else:
+      levels[str(message.guild.id)][str(message.author.id)]["xp"] = random.randint(15, 30)
+  else:
+    levels[str(message.guild.id)] = {}
+    levels[str(message.guild.id)][str(message.author.id)] = {}
+    levels[str(message.guild.id)][str(message.author.id)]["xp"] = random.randint(15, 30)
+    levels[str(message.guild.id)][str(message.author.id)]["level"] = 0
+  
+  if levels[str(message.guild.id)][str(message.author.id)]["xp"] >= 500:
+    levels[str(message.guild.id)][str(message.author.id)]["xp"] = 0
+    levels[str(message.guild.id)][str(message.author.id)]["level"] += 1
+    await message.channel.send(embed=discord.Embed(description=f":confetti_ball: {message.author.mention} You're now in level **{levels[str(message.guild.id)][str(message.author.id)]['level']}**"))
+
+  save_levels(levels)
+
   await client.process_commands(message)
 
 
@@ -261,6 +285,15 @@ def save_bad_words(warningsdata):
     f.write(json.dumps(warningsdata))
     f.close()
 
+def get_levels():
+  with open("levels.json", "r") as f:
+    return json.loads(f.read())
+    f.close()
+
+def save_levels(warningsdata):
+  with open("levels.json", "w") as f:
+    f.write(json.dumps(warningsdata))
+    f.close()
 
 commands.append({"name": "warn", "description": "This command will warn a user", "usuage": f"{prefix}warn <user> <reason>", "category": "mod"})
 @discord.ext.commands.has_permissions(kick_members=True)
@@ -419,6 +452,14 @@ async def clear(ctx , amount=5):
   await ctx.channel.purge(limit=amount + 1)
 
 
+commands.append({"name" : "rank", "description" : "Check your rank", "usuage":f"{prefix}rank", "category": "tools"})
+@client.command()
+async def rank(ctx , member: discord.Member = None):
+  levels = get_levels()
+  if member == None:
+    await ctx.send(embed=discord.Embed(description=f"You are in level {levels[str(ctx.guild.id)][str(ctx.author.id)]['level']}").set_author(name=f"{ctx.author.name}'s Rank in {ctx.guild.name}", icon_url=ctx.author.avatar_url))
+  else:
+    await ctx.send(embed=discord.Embed(description=f"{member.mention} is in level {levels[str(ctx.guild.id)][str(member.id)]['level']}").set_author(name=member.name+f"'s Rank in {ctx.guild.name}", icon_url=member.avatar_url))
 
 
 client.run(os.getenv("DISCORD_TOKEN"))
