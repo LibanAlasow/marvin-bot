@@ -194,7 +194,9 @@ async def on_message(message):
       print("user in data")
       levels[str(message.guild.id)][str(message.author.id)]["xp"] += random.randint(15, 30)
     else:
+      levels[str(message.guild.id)][str(message.author.id)] = {"xp": 0, "level": 0}
       levels[str(message.guild.id)][str(message.author.id)]["xp"] = random.randint(15, 30)
+
   else:
     levels[str(message.guild.id)] = {}
     levels[str(message.guild.id)][str(message.author.id)] = {}
