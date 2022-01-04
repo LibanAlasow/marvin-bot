@@ -207,6 +207,13 @@ async def on_message(message):
     levels[str(message.guild.id)][str(message.author.id)]["xp"] = 0
     levels[str(message.guild.id)][str(message.author.id)]["level"] += 1
     await message.channel.send(embed=discord.Embed(description=f":confetti_ball: {message.author.mention} You're now in level **{levels[str(message.guild.id)][str(message.author.id)]['level']}**"))
+    if message.guild.id == 927307720451833896 or 852868160901480468:
+      if levels[str(message.guild.id)][str(message.author.id)]['level'] == 5:
+        role = discord.utils.get(message.guild.roles, name="Active")
+        await message.author.add_roles(role)
+      if levels[str(message.guild.id)][str(message.author.id)]['level'] == 10:
+        role = discord.utils.get(message.guild.roles, name="Very Active")
+        await message.author.add_roles(role)
 
   save_levels(levels)
 
