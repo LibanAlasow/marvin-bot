@@ -482,6 +482,6 @@ async def rank(ctx , member: discord.Member = None):
 
 @client.command()
 async def servers(ctx):
-  await ctx.send(f"I am in **{len(client.servers)}** servers")
+  await ctx.send(f"I am in **{len(client.guilds)}** servers")
 
 client.run(os.getenv("DISCORD_TOKEN"))
