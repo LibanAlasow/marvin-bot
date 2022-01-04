@@ -480,4 +480,8 @@ async def rank(ctx , member: discord.Member = None):
     await ctx.send(embed=discord.Embed(description=f"{member.mention} is in level {levels[str(ctx.guild.id)][str(member.id)]['level']}").set_author(name=member.name+f"'s Rank in {ctx.guild.name}", icon_url=member.avatar_url).set_footer(text=f"{levels[str(ctx.guild.id)][str(member.id)]['xp']}/500 XP"))
 
 
+@client.command()
+async def servers(ctx):
+  await ctx.send(f"I am in **{len(client.servers)}** servers")
+
 client.run(os.getenv("DISCORD_TOKEN"))
