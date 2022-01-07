@@ -211,9 +211,6 @@ async def on_message(message):
       if levels[str(message.guild.id)][str(message.author.id)]['level'] == 5:
         role = discord.utils.get(message.guild.roles, name="Active")
         await message.author.add_roles(role)
-      if levels[str(message.guild.id)][str(message.author.id)]['level'] == 10:
-        role = discord.utils.get(message.guild.roles, name="Very Active")
-        await message.author.add_roles(role)
 
   save_levels(levels)
 
