@@ -187,11 +187,8 @@ async def on_message(message):
         break
     
   levels = get_levels()
-  print("get levels")
   if str(message.guild.id) in levels:
-    print("guild in data")
     if str(message.author.id) in levels[str(message.guild.id)]:
-      print("user in data")
       levels[str(message.guild.id)][str(message.author.id)]["xp"] += random.randint(15, 30)
     else:
       levels[str(message.guild.id)][str(message.author.id)] = {"xp": 0, "level": 0}
@@ -206,7 +203,15 @@ async def on_message(message):
   if levels[str(message.guild.id)][str(message.author.id)]["xp"] >= 500:
     levels[str(message.guild.id)][str(message.author.id)]["xp"] = 0
     levels[str(message.guild.id)][str(message.author.id)]["level"] += 1
-    await message.channel.send(embed=discord.Embed(description=f":confetti_ball: {message.author.mention} You're now in level **{levels[str(message.guild.id)][str(message.author.id)]['level']}**"))
+    logs = get_log()
+    if str(message.guild.id) in logs:
+      chnl = client.get_channel(int(logs[str(message.guild.id)]))
+      await chnl.send(embed=discord.Embed(description=f":confetti_ball: {message.author.mention} You're now in level **{levels[str(message.guild.id)][str(message.author.id)]['level']}**"))
+    else:
+      await message.channel.send(embed=discord.Embed(description=f":confetti_ball: {message.author.mention} You're now in level **{levels[str(message.guild.id)][str(message.author.id)]['level']}**"))
+
+
+
     if message.guild.id == 927307720451833896 or 852868160901480468:
       if levels[str(message.guild.id)][str(message.author.id)]['level'] == 5:
         role = discord.utils.get(message.guild.roles, name="Active")
@@ -310,6 +315,42 @@ def save_levels(warningsdata):
     f.write(json.dumps(warningsdata))
     f.close()
 
+def get_log():
+  with open("log.json", "r") as f:
+    return json.loads(f.read())
+    f.close()
+
+def save_log(warningsdata):
+  with open("log.json", "w") as f:
+    f.write(json.dumps(warningsdata))
+    f.close()
+
+
+
+
+
+
+
+
+
+commands.append({"name": "change_log_channel", "description": "This command will change the log channel", "usuage": f"{prefix}change_log_channel <#channl>", "category": "tools"})
+@discord.ext.commands.has_permissions(kick_members=True)
+@client.command("change_log_channel")
+async def change_log_channel(ctx, channel : discord.TextChannel):
+  logs = get_log()
+  logs[str(ctx.guild.id)] = str(channel.id)
+  await ctx.send(embed=discord.Embed(description=f"Log channel changed to <#{channel.id}>!"))
+  save_log(logs)
+
+  
+
+
+
+
+
+
+
+
 commands.append({"name": "warn", "description": "This command will warn a user", "usuage": f"{prefix}warn <user> <reason>", "category": "mod"})
 @discord.ext.commands.has_permissions(kick_members=True)
 @client.command("warn")
@@ -326,7 +367,12 @@ async def warn(ctx, user:discord.Member,*, reason="No reason provided"):
   
   embed = discord.Embed(description=f'{user.mention} was warned for `{reason}`')
   embed.set_footer(text=f'by {ctx.author.name}, {warnData[str(ctx.guild.id)][str(user.id)]} warnings', icon_url=ctx.author.avatar_url)
+  logs = get_log()
+  if str(ctx.guild.id) in logs:
+    chnl = client.get_channel(int(logs[str(ctx.guild.id)]))
+    await chnl.send(embed=embed)
   await ctx.send(embed=embed)
+  
   save_warnings(warnData)
 
 commands.append({"name": "remove warn", "description": "This command will warn a user", "usuage": f"{prefix}remove_warn <user>", "category": "mod"})
@@ -346,6 +392,10 @@ async def remove_warn(ctx, user:discord.Member):
   
   embed = discord.Embed(description=f'removed a warning from {user.mention}')
   embed.set_footer(text=f'by {ctx.author.name}, {warnData[str(ctx.guild.id)][str(user.id)]} warnings', icon_url=ctx.author.avatar_url)
+  logs = get_log()
+  if str(ctx.guild.id) in logs:
+    chnl = client.get_channel(int(logs[str(ctx.guild.id)]))
+    await chnl.send(embed=embed)
   await ctx.send(embed=embed)
   save_warnings(warnData)
 
@@ -365,6 +415,11 @@ async def add_bad_word(ctx, word):
       words.append(word.upper())
       embed = discord.Embed(description=f'{ctx.author.mention} listed a prohibited word')
       await ctx.send(embed=embed)
+      logs = get_log()
+      if str(ctx.guild.id) in logs:
+        chnl = client.get_channel(int(logs[str(ctx.guild.id)]))
+        await chnl.send(embed=embed)
+      await ctx.send(embed=embed)
     bad_words[str(ctx.guild.id)] = words
   else:
     bad_words[str(ctx.guild.id)] = []
@@ -372,7 +427,12 @@ async def add_bad_word(ctx, word):
     words.append(word.upper())
     bad_words[str(ctx.guild.id)] = words
     embed = discord.Embed(description=f'{ctx.author.mention} listed a prohibited word')
+    logs = get_log()
+    if str(ctx.guild.id) in logs:
+      chnl = client.get_channel(int(logs[str(ctx.guild.id)]))
+      await chnl.send(embed=embed)
     await ctx.send(embed=embed)
+    
   save_bad_words(bad_words)
 
 
@@ -399,11 +459,19 @@ async def remove_bad_word(ctx, word):
     if word.upper() in words:
       words.remove(word.upper())
       await ctx.send(embed=discord.Embed(description=f'{ctx.author.mention} removed a bad word'))
+      logs = get_log()
+      if str(ctx.guild.id) in logs:
+        chnl = client.get_channel(int(logs[str(ctx.guild.id)]))
+        await chnl.send(embed=discord.Embed(description=f'{ctx.author.mention} removed a bad word'))
     else:
       await ctx.send(embed=discord.Embed(description=f'{ctx.author.mention} that word isn\'t listed!'))
     bad_words[str(ctx.guild.id)] = words
   else:
-    await ctx.send(embed=discord.Embed(description=f'{ctx.author.mention} removed a bad word'))
+    if str(ctx.guild.id) in logs:
+      chnl = client.get_channel(int(logs[str(ctx.guild.id)]))
+      await chnl.send(embed=discord.Embed(description=f'{ctx.author.mention} removed a bad word'))
+    await ctx.send(embed=discord.Embed(description=f'{ctx.author.mention} removed a bad word'))    
+
   save_bad_words(bad_words)
 
 commands.append({"name" : "kick", "description" : "This command will kick a member", "usuage":f"{prefix}kick <member> <reason>", "category": "mod"})
@@ -419,6 +487,10 @@ async def kick(ctx, member : discord.Member=None,*, reason=None):
     embed = discord.Embed(description=f"{member.mention} was kicked (`{reason}`)")
     await member.kick(reason=reason)
     await ctx.send(embed=embed)
+    logs = get_log()
+    if str(ctx.guild.id) in logs:
+      chnl = client.get_channel(int(logs[str(ctx.guild.id)]))
+      await chnl.send(embed=embed)
 
 commands.append({"name" : "ban", "description" : f"{prefix}This command will ban a member", "usuage":"ban <member> <reason>", "category": "mod"})
 @client.command()
@@ -432,6 +504,10 @@ async def ban(ctx, member : discord.Member=None,*, reason=None):
   else:
     embed = discord.Embed(description=f"{member.mention} was banned (`{reason}`)")
     await member.ban(reason=reason)
+    logs = get_log()
+    if ctx.guild.id in logs:
+      chnl = client.get_channel(int(logs[str(ctx.guild.id)]))
+      await chnl.send(embed=embed)
     await ctx.send(embed=embed)
   
 
@@ -475,6 +551,14 @@ async def rank(ctx , member: discord.Member = None):
     await ctx.send(embed=discord.Embed(description=f"You are in level {levels[str(ctx.guild.id)][str(ctx.author.id)]['level']}").set_author(name=f"{ctx.author.name}'s Rank in {ctx.guild.name}", icon_url=ctx.author.avatar_url).set_footer(text=f"{levels[str(ctx.guild.id)][str(ctx.author.id)]['xp']}/500 XP"))
   else:
     await ctx.send(embed=discord.Embed(description=f"{member.mention} is in level {levels[str(ctx.guild.id)][str(member.id)]['level']}").set_author(name=member.name+f"'s Rank in {ctx.guild.name}", icon_url=member.avatar_url).set_footer(text=f"{levels[str(ctx.guild.id)][str(member.id)]['xp']}/500 XP"))
+
+
+
+
+
+
+
+
 
 
 @client.command()
