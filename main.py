@@ -40,6 +40,23 @@ async def on_member_remove(member):
 
 
 
+@client.event 
+async def on_command_error(ctx, error): 
+    if isinstance(error, CommandNotFound): 
+        em = discord.Embed(description=f"{ctx.author.mention} I couldn't find command `{ctx.message.content}`", color=ctx.author.color) 
+        await ctx.send(embed=em)
+    elif isinstance(error, MissingPermissions): 
+        em = discord.Embed(description=f"{ctx.author.mention} You're not allowed to use this command!", color=ctx.author.color) 
+        await ctx.send(embed=em)
+    
+    elif isinstance(error, CommandNotFound): 
+        em = discord.Embed(description=f"{ctx.author.mention} I couldn't find the command `{ctx.message.content}`", color=ctx.author.color) 
+        await ctx.send(embed=em)
+    
+    elif isinstance(error, MissingRequiredArgument):
+      em = discord.Embed(description=f"{ctx.author.mention} You're missing one or more required arguments", color=ctx.author.color) 
+      await ctx.send(embed=em)
+
 
 
 
@@ -167,25 +184,26 @@ import random
 async def on_message(message):
   if message.author == client: return
   if message.channel.type is discord.ChannelType.private: return
-  if str(message.guild.id) in get_bad_words():
-    dat = get_bad_words()
-    for i in dat[str(message.guild.id)]:
-      if i in message.content.upper():
-        await message.delete()
-        await message.channel.send(embed=discord.Embed(description=f'{message.author.mention} your message contained a prohibited word!'))
-        warnData = get_warnings()
-        user = message.author
-        if str(message.guild.id) in warnData.keys():
-          if str(user.id) in warnData[str(message.guild.id)].keys():
-            warnData[str(message.guild.id)][str(user.id)] += 1
+  if not message.author.guild_permissions.manage_messages:
+    if str(message.guild.id) in get_bad_words():
+      dat = get_bad_words()
+      for i in dat[str(message.guild.id)]:
+        if i in message.content.upper():
+          await message.delete()
+          await message.channel.send(embed=discord.Embed(description=f'{message.author.mention} your message contained a prohibited word!'))
+          warnData = get_warnings()
+          user = message.author
+          if str(message.guild.id) in warnData.keys():
+            if str(user.id) in warnData[str(message.guild.id)].keys():
+              warnData[str(message.guild.id)][str(user.id)] += 1
+            else:
+              warnData[str(message.guild.id)][str(user.id)] = 1
           else:
+            warnData[str(message.guild.id)] = {}
             warnData[str(message.guild.id)][str(user.id)] = 1
-        else:
-          warnData[str(message.guild.id)] = {}
-          warnData[str(message.guild.id)][str(user.id)] = 1
-        save_warnings(warnData)
-        break
-    
+          save_warnings(warnData)
+          break
+      
   levels = get_levels()
   if str(message.guild.id) in levels:
     if str(message.author.id) in levels[str(message.guild.id)]:
